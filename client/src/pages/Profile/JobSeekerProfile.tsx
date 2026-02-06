@@ -11,6 +11,17 @@ import { countryOptions, industryOptions, currentPositionOptions } from "../../u
 import { useAuth } from "../../contexts/AuthContext";
 import { allCountries } from 'country-telephone-data';
 
+const COLORS = {
+  dark: '#1b3c53',      // Dark navy blue
+  medium: '#234c6a',    // Medium blue
+  light: '#456882',     // Light blue
+  bg: '#e3e3e3',        // Light gray background
+  blue: '#1292bf',
+  white: '#ffffff',
+  text: '#1f2937',
+  textLight: '#6b7280',
+};
+
 const availabilityOptions = [
   { value: "", label: "Select Availability" },
   { value: "Immediately", label: "Immediately" },
@@ -130,8 +141,8 @@ export const JobSeekerProfile: React.FC = () => {
     profilePic: "",
     resumeUrl: "",
     careerHistory: [
-    { company: "", title: "", position: "",  location: "", from_date: "", to_date: "", currentlyWorking: false },
-  ],
+      { company: "", title: "", position: "", location: "", from_date: "", to_date: "", currentlyWorking: false },
+    ],
   });
 
   const countryCodeOptions = allCountries.map((country) => ({
@@ -177,36 +188,36 @@ export const JobSeekerProfile: React.FC = () => {
     }
   };
 
-    const fetchProfile = async () => {
+  const fetchProfile = async () => {
     try {
       const { data } = await api.get("/profiles/job-seeker/me");
       if (data.profile) {
         setIsNewProfile(false);
         const p = data.profile;
-        
+
         const fetchedPhone = p.phone?.toString().trim() ?? "";
         let fetchedCountryCode = '+971'; // Default
         let justPhoneNumber = "";
 
         if (fetchedPhone.startsWith('+')) {
-            const firstSpaceIndex = fetchedPhone.indexOf(' ');
-            if (firstSpaceIndex > -1) {
-                fetchedCountryCode = fetchedPhone.substring(0, firstSpaceIndex);
-                justPhoneNumber = fetchedPhone.substring(firstSpaceIndex + 1);
-            } else {
-                const sortedCountries = [...allCountries].sort((a, b) => b.dialCode.length - a.dialCode.length);
-                const foundCountry = sortedCountries.find(country => fetchedPhone.startsWith(`+${country.dialCode}`));
+          const firstSpaceIndex = fetchedPhone.indexOf(' ');
+          if (firstSpaceIndex > -1) {
+            fetchedCountryCode = fetchedPhone.substring(0, firstSpaceIndex);
+            justPhoneNumber = fetchedPhone.substring(firstSpaceIndex + 1);
+          } else {
+            const sortedCountries = [...allCountries].sort((a, b) => b.dialCode.length - a.dialCode.length);
+            const foundCountry = sortedCountries.find(country => fetchedPhone.startsWith(`+${country.dialCode}`));
 
-                if (foundCountry) {
-                    const codeWithPlus = `+${foundCountry.dialCode}`;
-                    fetchedCountryCode = codeWithPlus;
-                    justPhoneNumber = fetchedPhone.substring(codeWithPlus.length).trim();
-                } else {
-                    justPhoneNumber = fetchedPhone;
-                }
+            if (foundCountry) {
+              const codeWithPlus = `+${foundCountry.dialCode}`;
+              fetchedCountryCode = codeWithPlus;
+              justPhoneNumber = fetchedPhone.substring(codeWithPlus.length).trim();
+            } else {
+              justPhoneNumber = fetchedPhone;
             }
+          }
         } else {
-            justPhoneNumber = fetchedPhone;
+          justPhoneNumber = fetchedPhone;
         }
 
         setCountryCode(fetchedCountryCode);
@@ -245,19 +256,19 @@ export const JobSeekerProfile: React.FC = () => {
           passportNo: p.passportNo ?? p.passport_no ?? "",
           profilePic: p.avatar ?? p.profile_pic ?? "",
           resumeUrl: p.resumeUrl ?? (p.resume_url ? `${process.env.NEXT_PUBLIC_API_URL}${p.resume_url}` : ""),
-         careerHistory: p.careerHistory?.map((c: any) => ({
-          id: c.id, // keep backend ID
-          company: c.company,
-          title: c.title,
-          position: c.position,
-          location: c.location ?? "",
-          from_date: c.from_date ? new Date(c.from_date).toISOString().slice(0, 7) : "",
-          to_date: c.to_date ? new Date(c.to_date).toISOString().slice(0, 7) : "",
-          currentlyWorking: c.currently_working,
-        })) || [],
-      });
-    }
-  } catch (err) {
+          careerHistory: p.careerHistory?.map((c: any) => ({
+            id: c.id, // keep backend ID
+            company: c.company,
+            title: c.title,
+            position: c.position,
+            location: c.location ?? "",
+            from_date: c.from_date ? new Date(c.from_date).toISOString().slice(0, 7) : "",
+            to_date: c.to_date ? new Date(c.to_date).toISOString().slice(0, 7) : "",
+            currentlyWorking: c.currently_working,
+          })) || [],
+        });
+      }
+    } catch (err) {
       console.error("Error fetching profile:", err);
     }
   };
@@ -299,7 +310,7 @@ export const JobSeekerProfile: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (
-      ![ "application/pdf",
+      !["application/pdf",
         "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       ].includes(file.type)
@@ -315,22 +326,22 @@ export const JobSeekerProfile: React.FC = () => {
   };
 
   // Career history handlers
- const handleCareerChange = (index: number, field: string, value: any) => {
- const updatedCareer = [...profile.careerHistory];
-  if (field === "from_date" || field === "to_date") {
-    // Ensure date is in YYYY-MM format
-    updatedCareer[index][field] = value; // Value from <input type="month"> is already YYYY-MM
-  } else {
-    updatedCareer[index][field] = value;
-  }
-  setProfile((prev: any) => ({ ...prev, careerHistory: updatedCareer }));
-};
+  const handleCareerChange = (index: number, field: string, value: any) => {
+    const updatedCareer = [...profile.careerHistory];
+    if (field === "from_date" || field === "to_date") {
+      // Ensure date is in YYYY-MM format
+      updatedCareer[index][field] = value; // Value from <input type="month"> is already YYYY-MM
+    } else {
+      updatedCareer[index][field] = value;
+    }
+    setProfile((prev: any) => ({ ...prev, careerHistory: updatedCareer }));
+  };
   const addCareerEntry = () => {
-  setProfile((prev: any) => ({
-    ...prev,
-    careerHistory: [...prev.careerHistory, { company: "", title: "", position: "", location: "", from_date: "", to_date: "", currentlyWorking: false }],
-  }));
-};
+    setProfile((prev: any) => ({
+      ...prev,
+      careerHistory: [...prev.careerHistory, { company: "", title: "", position: "", location: "", from_date: "", to_date: "", currentlyWorking: false }],
+    }));
+  };
 
   const removeCareerEntry = (index: number) => {
     const updatedCareer = [...profile.careerHistory];
@@ -338,13 +349,13 @@ export const JobSeekerProfile: React.FC = () => {
     setProfile((prev: any) => ({ ...prev, careerHistory: updatedCareer }));
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    const formData = new FormData();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const formData = new FormData();
 
-    // Normalize career history to match backend
+      // Normalize career history to match backend
       const normalizedCareer = profile.careerHistory.map((c) => ({
         ...c,
         currently_working: c.currentlyWorking,
@@ -353,41 +364,41 @@ const handleSubmit = async (e: React.FormEvent) => {
         location: c.location || "N/A", // fallback if empty
       }));
 
-    const profileData = { ...profile };
-    profileData.phone = `${countryCode} ${profile.phone.replace(/^0+/, '')}`.trim();
+      const profileData = { ...profile };
+      profileData.phone = `${countryCode} ${profile.phone.replace(/^0+/, '')}`.trim();
 
-    Object.entries(profileData).forEach(([key, value]) => {
-      if (["skills", "industries", "currentCompensation", "expectedCompensation"].includes(key)) {
-        formData.append(key, JSON.stringify(value));
-      } else if (key === "careerHistory") {
-        formData.append("careerHistory", JSON.stringify(normalizedCareer));
-      } else if (value !== null && value !== undefined) {
-        formData.append(key, String(value));
-      }
-    });
+      Object.entries(profileData).forEach(([key, value]) => {
+        if (["skills", "industries", "currentCompensation", "expectedCompensation"].includes(key)) {
+          formData.append(key, JSON.stringify(value));
+        } else if (key === "careerHistory") {
+          formData.append("careerHistory", JSON.stringify(normalizedCareer));
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, String(value));
+        }
+      });
 
-    if (resumeFile) formData.append("resume", resumeFile);
-    if (profilePicFile) formData.append("avatar", profilePicFile);
+      if (resumeFile) formData.append("resume", resumeFile);
+      if (profilePicFile) formData.append("avatar", profilePicFile);
 
-    await api.post("/profiles/job-seeker", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    toast.success("Profile updated successfully!");
-    fetchProfile();
-  } catch (error: any) {
-    toast.error(error.response?.data?.message || "Failed to update profile");
-  } finally {
-    setLoading(false);
-  }
-};
-const isLastCareerCurrentlyWorking = profile.careerHistory.length
-  ? profile.careerHistory[profile.careerHistory.length - 1].currentlyWorking
-  : false;
+      await api.post("/profiles/job-seeker", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("Profile updated successfully!");
+      fetchProfile();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const isLastCareerCurrentlyWorking = profile.careerHistory.length
+    ? profile.careerHistory[profile.careerHistory.length - 1].currentlyWorking
+    : false;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-4">My Profile</h1>
-      
+
       {/* Job Interests Section */}
       <Card className="mb-6">
         <div className="space-y-4">
@@ -406,6 +417,7 @@ const isLastCareerCurrentlyWorking = profile.careerHistory.length
             />
             <div className="mt-4">
               <Button
+                variant="blue"
                 type="button"
                 onClick={handleSaveInterests}
                 disabled={savingInterests || userInterests.length === 0}
@@ -431,7 +443,7 @@ const isLastCareerCurrentlyWorking = profile.careerHistory.length
                 )}
               </div>
               <div>
-                <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                <label className="relative cursor-pointer bg-white rounded-md font-medium text-[#1292bf] hover:text-[#1292bf]/80">
                   <span>Upload a photo</span>
                   <input
                     type="file"
@@ -447,17 +459,17 @@ const isLastCareerCurrentlyWorking = profile.careerHistory.length
 
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="First Name" name="firstName" value={profile.firstName} onChange={handleChange} required />
-            <Input label="Last Name" name="lastName" value={profile.lastName} onChange={handleChange} required />
-            <Input label="Email" name="email" value={user?.email || ""} readOnly />
-            
-           <div className="grid grid-cols-3 gap-3">
+            <Input label="First Name" name="firstName" value={profile.firstName} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Input label="Last Name" name="lastName" value={profile.lastName} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Input label="Email" name="email" value={user?.email || ""} readOnly className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+
+            <div className="grid grid-cols-3 gap-3">
               <div className="relative">
                 <label
                   htmlFor="countryCode"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                   Code <span className="text-red-500">*</span>
+                  Code <span className="text-red-500">*</span>
                 </label>
                 <button
                   type="button"
@@ -469,7 +481,7 @@ const isLastCareerCurrentlyWorking = profile.careerHistory.length
                 </button>
                 {open && (
                   <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
-                    {countryCodeOptions.map((opt) => (
+                    {countryCodeOptions.map((opt: any) => (
                       <li
                         key={opt.value}
                         className="cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-blue-50"
@@ -480,7 +492,7 @@ const isLastCareerCurrentlyWorking = profile.careerHistory.length
                       >
                         {opt.label}
                       </li>
-                    )) }
+                    ))}
                   </ul>
                 )}
               </div>
@@ -493,120 +505,125 @@ const isLastCareerCurrentlyWorking = profile.careerHistory.length
                   onChange={handleChange}
                   placeholder="Enter your phone number"
                   required
+                  className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1"
                 />
               </div>
             </div>
-            <Input label="LinkedIn URL" name="linkedinUrl" value={profile.linkedinUrl} onChange={handleChange} />
-            <Input label="Date of Birth" name="dob" type="date" value={profile.dob} onChange={handleChange} required/>
-            <Select label="Gender" name="gender" options={genderOptions} value={profile.gender} onChange={handleChange} required/>
-            <Select label="Marital Status" name="maritalStatus" options={maritalStatusOptions} value={profile.maritalStatus} onChange={handleChange} required/>
-            <Select label="Nationality" name="nationality" options={countryOptions} value={profile.nationality} onChange={handleChange} required/>
+            <Input label="LinkedIn URL" name="linkedinUrl" value={profile.linkedinUrl} onChange={handleChange} className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Input label="Date of Birth" name="dob" type="date" value={profile.dob} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Select label="Gender" name="gender" options={genderOptions} value={profile.gender} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Select label="Marital Status" name="maritalStatus" options={maritalStatusOptions} value={profile.maritalStatus} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Select label="Nationality" name="nationality" options={countryOptions} value={profile.nationality} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
             {/* <Input label="QID Number" name="qidNo" value={profile.qidNo} onChange={handleChange} />
             <Input label="Passport Number" name="passportNo" value={profile.passportNo} onChange={handleChange} /> */}
           </div>
 
           {/* Experience & Compensation */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select label="Education Level" name="education" options={educationOptions} value={profile.education} onChange={handleChange} required/>
-            <Select label="Experience Level" name="experience" options={experienceOptions} value={profile.experience} onChange={handleChange} required/>
-            <Input label="Total Experience (years)" name="totalExperience" type="number" value={profile.totalExperience} onChange={handleChange} required/>
+            <Select label="Education Level" name="education" options={educationOptions} value={profile.education} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Select label="Experience Level" name="experience" options={experienceOptions} value={profile.experience} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Input label="Total Experience (years)" name="totalExperience" type="number" value={profile.totalExperience} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
             {/* <Input label="Current Employer Experience (years)" name="currentEmployerExperience" type="number" value={profile.currentEmployerExperience} onChange={handleChange} /> */}
-            <Input label="Current Compensation Amount" value={profile.currentCompensation.amount} onChange={(e) => handleCompensationChange("currentCompensation", "amount", e.target.value)} required/>
-            <Input label="Expected Compensation Amount" value={profile.expectedCompensation.amount} onChange={(e) => handleCompensationChange("expectedCompensation", "amount", e.target.value)} required/>
-            <Select label="Current Position" name="currentPosition" options={currentPositionOptions} value={profile.currentPosition} onChange={handleChange} required/>
-            <Input label="Dependents" name="dependents" type="number" value={profile.dependents} onChange={handleChange} />
+            <Input label="Current Compensation Amount" value={profile.currentCompensation.amount} onChange={(e) => handleCompensationChange("currentCompensation", "amount", e.target.value)} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Input label="Expected Compensation Amount" value={profile.expectedCompensation.amount} onChange={(e) => handleCompensationChange("expectedCompensation", "amount", e.target.value)} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Select label="Current Position" name="currentPosition" options={currentPositionOptions} value={profile.currentPosition} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+            <Input label="Dependents" name="dependents" type="number" value={profile.dependents} onChange={handleChange} className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
           </div>
 
-          <Input label="Reason for Change" name="reasonForChange" value={profile.reasonForChange} onChange={handleChange}/>
-          <Select label="Visa Type" name="visaStatus" options={visa_status} value={profile.visaStatus} onChange={handleChange} required/>
-          <Select label="Availability" name="availability" options={availabilityOptions} value={profile.availability} onChange={handleChange} required/>
-          <Input label="Location" name="location" value={profile.location} onChange={handleChange} required />
+          <Input label="Reason for Change" name="reasonForChange" value={profile.reasonForChange} onChange={handleChange} className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+          <Select label="Visa Type" name="visaStatus" options={visa_status} value={profile.visaStatus} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+          <Select label="Availability" name="availability" options={availabilityOptions} value={profile.availability} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
+          <Input label="Location" name="location" value={profile.location} onChange={handleChange} required className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
           <Select label="Industries" name="industries" options={industryOptions} value={profile.industries} onChange={(e: any) => setProfile({ ...profile, industries: Array.from(e.target.selectedOptions, (o: any) => o.value) })} required />
           {/* <Select label="Skills" name="skills" options={skillOptions} value={profile.skills} onChange={(e: any) => setProfile({ ...profile, skills: Array.from(e.target.selectedOptions, (o: any) => o.value) })}  /> */}
-          <Input label="Skills" name="skills" value={profile.skills} onChange={handleChange}  />
+          <Input label="Skills" name="skills" value={profile.skills} onChange={handleChange} className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1" />
 
           {/* Career History */}
-        <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Career History</h3>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Career History</h3>
 
-              {profile.careerHistory.map((entry: any, index: number) => (
-  <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-end border-b pb-4">
-    <Input
-      label="Company Name"
-      value={entry.company}
-      onChange={(e) => handleCareerChange(index, "company", e.target.value)}
-      required
-    />
-    <Input
-      label="Position"
-      value={entry.position}
-      onChange={(e) => handleCareerChange(index, "position", e.target.value)}
-      required
-    />
-    <Select
-      label="Work Type"
-      options={workTypeOptions}
-      value={entry.title}
-      onChange={(e) => handleCareerChange(index, "title", e.target.value)}
-      required
-    />
-    <Input
-      label="Location"
-      value={entry.location}
-      onChange={(e) => handleCareerChange(index, "location", e.target.value)}
-      required
-    />
+            {profile.careerHistory.map((entry: any, index: number) => (
+              <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-end border-b pb-4">
+                <Input
+                  label="Company Name"
+                  value={entry.company}
+                  onChange={(e) => handleCareerChange(index, "company", e.target.value)}
+                  required
+                  className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1"
+                />
+                <Input
+                  label="Position"
+                  value={entry.position}
+                  onChange={(e) => handleCareerChange(index, "position", e.target.value)}
+                  required
+                  className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1"
+                />
+                <Select
+                  label="Work Type"
+                  options={workTypeOptions}
+                  value={entry.title}
+                  onChange={(e) => handleCareerChange(index, "title", e.target.value)}
+                  required
+                  className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1"
+                />
+                <Input
+                  label="Location"
+                  value={entry.location}
+                  onChange={(e) => handleCareerChange(index, "location", e.target.value)}
+                  required
+                  className="focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1"
+                />
 
-    <div className="flex flex-col">
-      <label className="text-sm font-medium text-gray-700 mb-1">From</label>
-      <input
-        type="month"
-        value={entry.from_date || ""}
-        onChange={(e) => handleCareerChange(index, "from_date", e.target.value)}
-        className="border border-gray-300 rounded-md p-2"
-        required
-      />
-    </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">From</label>
+                  <input
+                    type="month"
+                    value={entry.from_date || ""}
+                    onChange={(e) => handleCareerChange(index, "from_date", e.target.value)}
+                    className="border border-gray-300 rounded-md p-2 focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1"
+                    required
+                  />
+                </div>
 
-    <div className="flex flex-col">
-      <label className="text-sm font-medium text-gray-700 mb-1">To</label>
-      {entry.currentlyWorking ? (
-        <span className="p-2 text-gray-900 font-medium">Present</span>
-      ) : (
-        <input
-          type="month"
-          value={entry.to_date || ""}
-          onChange={(e) => handleCareerChange(index, "to_date", e.target.value)}
-          className="border border-gray-300 rounded-md p-2"
-          required
-        />
-      )}
-    </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">To</label>
+                  {entry.currentlyWorking ? (
+                    <span className="p-2 text-gray-900 font-medium">Present</span>
+                  ) : (
+                    <input
+                      type="month"
+                      value={entry.to_date || ""}
+                      onChange={(e) => handleCareerChange(index, "to_date", e.target.value)}
+                      className="border border-gray-300 rounded-md p-2 focus:ring-[#1b3c53] focus:ring-1 focus:ring-offset-1"
+                      required
+                    />
+                  )}
+                </div>
 
-    <div className="flex items-center gap-2 col-span-1 md:col-span-2">
-      <input
-        type="checkbox"
-        checked={entry.currentlyWorking || false}
-        onChange={(e) => handleCareerChange(index, "currentlyWorking", e.target.checked)}
-      />
-      <label className="text-sm text-gray-700">I am currently working here</label>
-    </div>
+                <div className="flex items-center gap-2 col-span-1 md:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={entry.currentlyWorking || false}
+                    onChange={(e) => handleCareerChange(index, "currentlyWorking", e.target.checked)}
+                  />
+                  <label className="text-sm text-gray-700">I am currently working here</label>
+                </div>
 
-    <div className="col-span-1 md:col-span-2">
-      <Button type="button" onClick={() => removeCareerEntry(index)} className="bg-red-500 hover:bg-red-600">
-        Remove
-      </Button>
-    </div>
-  </div>
-))}
+                <div className="col-span-1 md:col-span-2">
+                  <Button type="button" onClick={() => removeCareerEntry(index)} className="bg-red-500 hover:bg-red-600">
+                    Remove
+                  </Button>
+                </div>
+              </div>
+            ))}
 
-  {/* Conditionally render Add Career Entry */}
-  {!isLastCareerCurrentlyWorking && (
-    <Button type="button" onClick={addCareerEntry} className="mt-2">
-      Add Career Entry
-    </Button>
-  )}
-</div>
+            {/* Conditionally render Add Career Entry */}
+            {!isLastCareerCurrentlyWorking && (
+              <Button type="button" onClick={addCareerEntry} className="mt-2">
+                Add Career Entry
+              </Button>
+            )}
+          </div>
 
 
           {/* Resume Upload */}
@@ -617,18 +634,18 @@ const isLastCareerCurrentlyWorking = profile.careerHistory.length
                 Upload Resume (PDF, DOC, DOCX)<span className="text-red-500">*</span>
               </label>
               {profile.resumeUrl && !resumeFile && (
-                    <div className="flex justify-end mt-3">
+                <div className="flex justify-end mt-3">
                   <a
                     href={profile.resumeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 flex items-center"
-                  >   
+                    className="inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg bg-[#1292bf] text-white hover:bg-[#1292bf]/80 focus:ring-[#1292bf] px-4 py-2 flex items-center"
+                  >
                     View Current Resume
                   </a>
                 </div>
-                  )}
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
+              )}
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-[#1292bf] transition-colors">
                 <div className="space-y-1 text-center">
                   <Upload className="mx-auto h-12 w-12 text-gray-400" />
                   <div className="flex text-sm text-gray-600">
@@ -655,7 +672,7 @@ const isLastCareerCurrentlyWorking = profile.careerHistory.length
             </div>
           </div>
 
-          <Button type="submit" disabled={loading} className="flex items-center">
+          <Button variant="search" type="submit" disabled={loading} className="flex items-center">
             <Save className="h-4 w-4 mr-2" />
             {loading ? "Saving..." : "Save Profile"}
           </Button>

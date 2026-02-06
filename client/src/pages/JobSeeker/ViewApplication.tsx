@@ -87,7 +87,7 @@ const ViewApplication: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Back Button */}
       <Link to="/applications">
-        <Button  className="inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-3 py-1.5 text-sm mb-6">
+        <Button variant="outline" className="inline-flex items-center justify-center font-medium  px-3 py-1.5 text-sm mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to Applications
         </Button>
       </Link>

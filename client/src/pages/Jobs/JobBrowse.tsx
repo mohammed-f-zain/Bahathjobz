@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Card } from "../../components/UI/Card";
 import { Button } from "../../components/UI/Button";
@@ -72,6 +72,8 @@ export function JobBrowse() {
     workTypes: false,
     seniorities: false,
   });
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
 
   const toggleFilter = (filterName: keyof typeof openFilters) => {
     setOpenFilters((prev) => ({
@@ -107,6 +109,70 @@ export function JobBrowse() {
       fetchUserEngagement();
     }
   }, [user]);
+
+  // Set up Intersection Observer for card animations
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+
+    // Reset visible cards when jobs change
+    setVisibleCards(new Set());
+
+    // Use setTimeout to ensure refs are set after render
+    const timeoutId = setTimeout(() => {
+      // Observe job cards
+      cardRefs.current.forEach((card, index) => {
+        if (!card) return;
+
+        // Check if card is already in viewport
+        const rect = card.getBoundingClientRect();
+        const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isInViewport) {
+          // If already in view, add to visible cards immediately
+          setVisibleCards((prev) => {
+            const newSet = new Set(prev);
+            newSet.add(index);
+            return newSet;
+          });
+        }
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                // Add a small delay to ensure the class removal is registered
+                setTimeout(() => {
+                  setVisibleCards((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.add(index);
+                    return newSet;
+                  });
+                }, 10);
+              } else {
+                setVisibleCards((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(index);
+                  return newSet;
+                });
+              }
+            });
+          },
+          {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px',
+          }
+        );
+
+        observer.observe(card);
+        observers.push(observer);
+      });
+    }, 200);
+
+    return () => {
+      clearTimeout(timeoutId);
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, [jobs]);
 
   const fetchUserEngagement = async () => {
     try {
@@ -303,18 +369,18 @@ export function JobBrowse() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#e3e3e3]">
-        <div className="p-6">
-          <div className="animate-pulse space-y-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
-                <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded mb-4 w-3/4"></div>
-                <div className="flex space-x-4">
-                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                  <div className="h-4 bg-gray-200 rounded w-32"></div>
-                </div>
+      <div className="p-6">
+        <div className="animate-pulse space-y-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="h-6 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded mb-4 w-3/4"></div>
+              <div className="flex space-x-4">
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                <div className="h-4 bg-gray-200 rounded w-32"></div>
               </div>
-            ))}
+            </div>
+          ))}
           </div>
         </div>
       </div>
@@ -336,8 +402,8 @@ export function JobBrowse() {
               Browse Jobs
             </h1>
             <p className="text-xl text-white/90 mb-8">
-              Discover opportunities that match your skills and interests
-            </p>
+          Discover opportunities that match your skills and interests
+        </p>
 
             {/* Search Box - Half on bg, half on white */}
             <div className="absolute bottom-0 left-0 right-0 transform translate-y-1/2">
@@ -372,7 +438,7 @@ export function JobBrowse() {
                         className="w-full pr-4 py-3 focus:outline-none placeholder:italic text-sm sm:text-base"
                       />
                     </div>
-                  </div>
+      </div>
                   <div className="flex items-center w-full md:w-auto justify-center md:justify-start">
                     <button
                       onClick={handleSearch}
@@ -386,8 +452,8 @@ export function JobBrowse() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+            </div>
+          </div>
 
       {/* Jobs Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-40 pb-16">
@@ -488,8 +554,8 @@ export function JobBrowse() {
                         <span style={{ color: COLORS.dark }}>{option.label}</span>
                       </label>
                     ))}
-                  </div>
-                )}
+            </div>
+          )}
               </div>
 
               {/* Experience Level Filter */}
@@ -530,9 +596,9 @@ export function JobBrowse() {
                     ))}
                   </div>
                 )}
-              </div>
             </div>
           </div>
+        </div>
 
           {/* Right Section - Jobs (70%) */}
           <div className="w-full lg:w-[70%]">
@@ -546,10 +612,24 @@ export function JobBrowse() {
 
             {/* Jobs Grid - 2 cards per row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {jobs.map((job: any) => (
+              {jobs.map((job: any, index: number) => {
+                const animationClass = index % 4 === 0 
+                  ? 'animate-fade-in-up' 
+                  : index % 4 === 1 
+                  ? 'animate-fade-in-up-delayed' 
+                  : index % 4 === 2 
+                  ? 'animate-fade-in-up-delayed-2' 
+                  : 'animate-fade-in-up-delayed-3';
+                
+                return (
                 <div
                   key={job.id}
-                  className="group relative"
+                  ref={(el) => {
+                    if (el) {
+                      cardRefs.current[index] = el;
+                    }
+                  }}
+                  className={`group relative ${visibleCards.has(index) ? animationClass : 'opacity-0'}`}
                 >
                   <div className="min-h-[500px] p-6 border-2 border-gray-300 hover:border-[#456882] hover:shadow-2xl transition-all duration-300 cursor-pointer relative overflow-hidden bg-white rounded-lg hover:rounded-br-[4rem] shadow-sm flex flex-col">
                     {/* Logo that slides on hover */}
@@ -565,30 +645,30 @@ export function JobBrowse() {
                     <div className="relative z-10 flex flex-col flex-1">
                       {/* Logo and Title */}
                       <div className="flex items-center space-x-3 mb-4">
-                        <CompanyLogo
-                          logo={job.company_logo}
-                          name={job.company_name}
-                        />
+                      <CompanyLogo
+                        logo={job.company_logo}
+                        name={job.company_name}
+                      />
                         <div className="flex-1 min-w-0">
                           <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#456882] transition-colors line-clamp-1">
-                            {job.title}
-                          </h3>
+                          {job.title}
+                        </h3>
                           <p className="text-base text-gray-600 line-clamp-1">
-                            {job.company_name}
-                          </p>
-                        </div>
+                          {job.company_name}
+                        </p>
                       </div>
+                    </div>
 
                       {/* Location */}
                       <div className="flex items-center text-base text-gray-600 mb-3">
                         <MapPin className="h-5 w-5 mr-1 transition-colors group-hover:text-[#1292bf]" />
                         <span className="line-clamp-1">{job.location}</span>
-                      </div>
+                </div>
 
                       {/* Description */}
                       <p className="text-gray-600 mb-4 line-clamp-2 text-base flex-1">
-                        {job.description}
-                      </p>
+                  {job.description}
+                </p>
 
                       {/* Salary */}
                       <div className="mb-4">
@@ -604,33 +684,33 @@ export function JobBrowse() {
                       </div>
 
                       {/* Badges */}
-                      <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${getWorkTypeBadge(
-                            job.work_type
-                          )}`}
-                        >
-                          {job.work_type.charAt(0).toUpperCase() +
-                            job.work_type.slice(1)}
-                        </span>
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${getSeniorityBadge(
-                            job.seniority
-                          )}`}
-                        >
-                          {job.seniority.charAt(0).toUpperCase() +
-                            job.seniority.slice(1)}{" "}
-                          Level
-                        </span>
-                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-                          {job.industry}
-                        </span>
-                        {job.visa_eligible && (
-                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                            Visa Eligible
-                          </span>
-                        )}
-                      </div>
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${getWorkTypeBadge(
+                      job.work_type
+                    )}`}
+                  >
+                    {job.work_type.charAt(0).toUpperCase() +
+                      job.work_type.slice(1)}
+                  </span>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${getSeniorityBadge(
+                      job.seniority
+                    )}`}
+                  >
+                    {job.seniority.charAt(0).toUpperCase() +
+                      job.seniority.slice(1)}{" "}
+                    Level
+                  </span>
+                  <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                    {job.industry}
+                  </span>
+                  {job.visa_eligible && (
+                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                      Visa Eligible
+                    </span>
+                  )}
+                </div>
 
                       {/* Learn More Button */}
                       <Link
@@ -679,51 +759,52 @@ export function JobBrowse() {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* No jobs found */}
-            {jobs.length === 0 && !loading && (
-              <Card className="text-center py-12">
-                <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  No jobs found
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Try adjusting your search criteria or filters
-                </p>
+        {jobs.length === 0 && !loading && (
+          <Card className="text-center py-12">
+            <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No jobs found
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Try adjusting your search criteria or filters
+            </p>
                 <Button variant="blue" onClick={clearFilters}>Clear Filters</Button>
-              </Card>
-            )}
+          </Card>
+        )}
 
-            {/* Pagination */}
-            {pagination.totalPages > 1 && (
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
               <div className="flex items-center justify-center gap-4 mt-8">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={pagination.page === 1}
-                  onClick={() =>
-                    setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
-                  }
-                >
-                  Previous
-                </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.page === 1}
+                onClick={() =>
+                  setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
+                }
+              >
+                Previous
+              </Button>
                 <span className="px-3 py-1 text-sm text-gray-600">
-                  Page {pagination.page} of {pagination.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={pagination.page === pagination.totalPages}
-                  onClick={() =>
-                    setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
-                  }
-                >
-                  Next
-                </Button>
-              </div>
-            )}
+                Page {pagination.page} of {pagination.totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.page === pagination.totalPages}
+                onClick={() =>
+                  setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
+                }
+              >
+                Next
+              </Button>
+            </div>
+      )}
           </div>
         </div>
       </div>

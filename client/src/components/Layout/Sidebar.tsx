@@ -167,7 +167,7 @@ export function Sidebar() {
       {/* Mobile Menu Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed bottom-4 right-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+        className="lg:hidden fixed bottom-4 right-4 z-50 bg-[#1292bf] text-white p-3 rounded-full shadow-lg hover:bg-[#1292bf]/80 transition-colors"
         aria-label="Toggle menu"
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -193,7 +193,7 @@ export function Sidebar() {
         {/* Collapse Toggle - Desktop Only */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden lg:flex absolute -right-3 top-20 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:bg-gray-50 z-10"
+          className="hidden lg:flex absolute -right-1 top-20 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:bg-gray-50 z-10"
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {isCollapsed ? (
@@ -224,12 +224,12 @@ export function Sidebar() {
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center ${isCollapsed ? 'lg:justify-center' : 'space-x-3'} px-3 py-2.5 rounded-lg transition-colors w-full min-w-0 ${
                     isActive
-                      ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
+                      ? 'bg-blue-50 text-[#1292bf] border-r-2 border-[#1292bf]'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`h-5 w-5 flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <Icon className={`h-5 w-5 flex-shrink-0 ${isActive ? 'text-[#1292bf]' : 'text-gray-400'}`} />
                   <span className={`font-medium text-sm ${isCollapsed ? 'lg:hidden' : ''} truncate`}>{item.label}</span>
                 </Link>
               );

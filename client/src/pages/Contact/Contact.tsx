@@ -95,6 +95,11 @@ export function Contact() {
   const [loading, setLoading] = useState(false);
   const supportCategoriesRef = useRef<HTMLDivElement>(null);
   const [isSupportCategoriesVisible, setIsSupportCategoriesVisible] = useState(false);
+  const heroRef = useRef<HTMLDivElement | null>(null);
+  const methodsRef = useRef<HTMLDivElement | null>(null);
+  const formRef = useRef<HTMLDivElement | null>(null);
+  const faqRef = useRef<HTMLDivElement | null>(null);
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -124,6 +129,60 @@ export function Contact() {
       if (supportCategoriesRef.current) {
         observer.unobserve(supportCategoriesRef.current);
       }
+    };
+  }, []);
+
+  // Scroll-triggered animations for main sections
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+
+    const observeElement = (
+      element: HTMLElement | null,
+      sectionName: string
+    ) => {
+      if (!element) return;
+
+      // Check if already in viewport
+      const rect = element.getBoundingClientRect();
+      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+
+      if (isInViewport) {
+        setVisibleSections((prev) => new Set([...prev, sectionName]));
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setTimeout(() => {
+                setVisibleSections((prev) => new Set([...prev, sectionName]));
+              }, 10);
+            } else {
+              setVisibleSections((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(sectionName);
+                return newSet;
+              });
+            }
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: '0px 0px -100px 0px',
+        }
+      );
+
+      observer.observe(element);
+      observers.push(observer);
+    };
+
+    observeElement(heroRef.current, 'hero');
+    observeElement(methodsRef.current, 'methods');
+    observeElement(formRef.current, 'form');
+    observeElement(faqRef.current, 'faq');
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
     };
   }, []);
   
@@ -187,7 +246,8 @@ export function Contact() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div 
-          className="rounded-2xl p-12 mb-12 text-white shadow-xl"
+          ref={heroRef}
+          className={`rounded-2xl p-12 mb-12 text-white shadow-xl ${visibleSections.has('hero') ? 'animate-fade-in-up' : 'opacity-0'}`}
           style={{ 
             background: `linear-gradient(135deg, ${COLORS.dark} 0%, ${COLORS.medium} 50%, ${COLORS.light} 100%)`
           }}
@@ -203,7 +263,10 @@ export function Contact() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             {/* Contact Methods */}
-            <div className="lg:col-span-1 lg:sticky lg:top-4 lg:self-start">
+            <div
+              ref={methodsRef}
+              className={`lg:col-span-1 lg:sticky lg:top-4 lg:self-start ${visibleSections.has('methods') ? 'animate-fade-in-up' : 'opacity-0'}`}
+            >
               <h2 className="text-2xl font-bold mb-6" style={{ color: COLORS.dark }}>Get in Touch</h2>
               <div className="space-y-4">
                 {contactMethods.map((method, index) => {
@@ -254,7 +317,10 @@ export function Contact() {
             </div>
 
             {/* Contact Form */}
-            <div className="lg:col-span-2">
+            <div
+              ref={formRef}
+              className={`lg:col-span-2 ${visibleSections.has('form') ? 'animate-fade-in-up-delayed' : 'opacity-0'}`}
+            >
               <Card className="p-8" style={{ backgroundColor: COLORS.white }}>
                 <h2 className="text-2xl font-bold mb-6" style={{ color: COLORS.dark }}>Send us a Message</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -347,7 +413,10 @@ export function Contact() {
           </div>
 
           {/* FAQ Section */}
-          <div className="mb-12">
+          <div
+            ref={faqRef}
+            className={`mb-12 ${visibleSections.has('faq') ? 'animate-fade-in-up' : 'opacity-0'}`}
+          >
             <h2 className="text-3xl font-bold text-center mb-12" style={{ color: COLORS.dark }}>Frequently Asked Questions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {faqs.map((faq, index) => (

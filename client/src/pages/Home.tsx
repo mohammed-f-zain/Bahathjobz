@@ -442,7 +442,7 @@ export function Home() {
                 >
                   <Link to={`/jobs/${job.id}`} className="block h-full">
                     <div
-                      className="h-full p-5 sm:p-6 hover:shadow-2xl transition-all duration-300 border-2 cursor-pointer relative overflow-hidden rounded-lg"
+                      className="h-full p-5 sm:p-6 hover:shadow-2xl transition-all duration-300 border-2 cursor-pointer relative overflow-hidden rounded-lg hover:rounded-br-[4rem]"
                       style={{
                         backgroundColor: COLORS.white,
                         borderColor: COLORS.bg

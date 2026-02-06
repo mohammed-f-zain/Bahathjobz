@@ -7,7 +7,7 @@ import { Layout } from './components/Layout/Layout';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { InterestsModalWrapper } from './components/InterestsModalWrapper';
 import { Toaster } from 'react-hot-toast';
-
+import ScrollToTop from './components/ScrollToTop';
 // Import pages
 import { Home } from './pages/Home';
 import { Login } from './pages/Auth/Login';
@@ -82,6 +82,7 @@ function App() {
                 },
               }}
             />
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Layout />}>
                 {/* Public routes */}

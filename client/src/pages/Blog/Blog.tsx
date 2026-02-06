@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "../../components/UI/Card";
 import { Card2 } from "../../components/UI/Card2";
@@ -50,11 +50,100 @@ export function Blog() {
     total: 0,
     totalPages: 0,
   });
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const featuredPostRef = useRef<HTMLDivElement | null>(null);
+  const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
+  const [isFeaturedVisible, setIsFeaturedVisible] = useState(false);
 
   useEffect(() => {
     fetchPosts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory]); // re-fetch only when category changes
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+
+    // Reset visible cards when posts change
+    setVisibleCards(new Set());
+    setIsFeaturedVisible(false);
+
+    // Observe featured post
+    if (featuredPostRef.current) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setIsFeaturedVisible(true);
+            } else {
+              setIsFeaturedVisible(false);
+            }
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px',
+        }
+      );
+      observer.observe(featuredPostRef.current);
+      observers.push(observer);
+    }
+
+    // Use setTimeout to ensure refs are set after render
+    const timeoutId = setTimeout(() => {
+      // Observe grid cards - iterate through all refs
+      cardRefs.current.forEach((card, index) => {
+        if (!card) return;
+
+        // Check if card is already in viewport
+        const rect = card.getBoundingClientRect();
+        const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isInViewport) {
+          // If already in view, add to visible cards immediately
+          setVisibleCards((prev) => {
+            const newSet = new Set(prev);
+            newSet.add(index);
+            return newSet;
+          });
+        }
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                // Add a small delay to ensure the class removal is registered
+                setTimeout(() => {
+                  setVisibleCards((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.add(index);
+                    return newSet;
+                  });
+                }, 10);
+              } else {
+                setVisibleCards((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(index);
+                  return newSet;
+                });
+              }
+            });
+          },
+          {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px',
+          }
+        );
+
+        observer.observe(card);
+        observers.push(observer);
+      });
+    }, 200);
+
+    return () => {
+      clearTimeout(timeoutId);
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, [posts]);
 
   const fetchPosts = async () => {
     try {
@@ -156,6 +245,10 @@ export function Blog() {
 
       {/* Featured Post */}
       {selectedCategory === "All" && posts.length > 0 && (
+        <div
+          ref={featuredPostRef}
+          className={isFeaturedVisible ? 'animate-fade-in-up' : 'opacity-0'}
+        >
         <Card className="mb-8 overflow-hidden max-w-6xl mx-auto mb-16">
           <div className="md:flex">
             <div className="md:w-1/2">
@@ -179,7 +272,7 @@ export function Blog() {
               </h2>
               <p className="text-gray-600 mb-6">{posts[0].excerpt}</p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex flex-col sm:flex-row items-start justify-start space-x-4 text-sm text-gray-500 ">
                   <span className="flex items-center">
                     <User className="h-4 w-4 mr-1" />
                     {posts[0].author}
@@ -218,14 +311,32 @@ export function Blog() {
             </div>
           </div>
         </Card>
+        </div>
       )}
 
       {/* Blog Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-6xl mx-auto mb-16">
-        {posts.slice(selectedCategory === "All" ? 1 : 0).map((post) => (
-          <Card2
+        {posts.slice(selectedCategory === "All" ? 1 : 0).map((post, index) => {
+          const cardIndex = selectedCategory === "All" ? index + 1 : index;
+          const animationClass = index % 4 === 0 
+            ? 'animate-fade-in-up' 
+            : index % 4 === 1 
+            ? 'animate-fade-in-up-delayed' 
+            : index % 4 === 2 
+            ? 'animate-fade-in-up-delayed-2' 
+            : 'animate-fade-in-up-delayed-3';
+          
+          return (
+          <div
             key={post.id}
+            ref={(el) => {
+              if (el) {
+                cardRefs.current[cardIndex] = el;
+              }
+            }}
+            className={visibleCards.has(cardIndex) ? animationClass : 'opacity-0'}
           >
+          <Card2>
             <img
               src={post.featured_image !== null ? `${import.meta.env.VITE_URL}${post.featured_image}` : getDefaultImage(post.category)}
               alt={post.title}
@@ -280,7 +391,9 @@ export function Blog() {
               </div>
             </div>
           </Card2>
-        ))}
+          </div>
+        );
+        })}
       </div>
 
       {/* No Posts */}

@@ -37,7 +37,7 @@ export function ContactReplies() {
   return (
     <div className="p-6 space-y-6">
       {/* Back Button */}
-      <Button size="sm" variant="ghost" onClick={() => navigate(-1)}>
+      <Button size="sm" variant="outline" onClick={() => navigate(-1)}>
         <ArrowLeft className="h-4 w-4 mr-1" /> Back to Contact Details
       </Button>
 
@@ -45,7 +45,7 @@ export function ContactReplies() {
         <h1 className="text-2xl font-bold text-gray-900">Admin Replies</h1>
 
         {replies.length > 0 ? (
-          replies.map((reply) => (
+          replies.map((reply: any) => (
             <div
               key={reply.id}
               className="bg-green-50 border border-green-200 p-3 rounded-lg shadow-sm"

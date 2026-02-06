@@ -4,9 +4,21 @@ import { useAuth } from "../../contexts/AuthContext";
 import { Card } from "../../components/UI/Card";
 import { Input } from "../../components/UI/Input";
 import { Button } from "../../components/UI/Button";
-import { Search, User } from "lucide-react";
 import { useCustomToast } from "../../contexts/useCustomToast";
 import api from "../../utils/api";
+
+
+import logoMulticolor from "../../image/logo-multicolor.png";
+
+const COLORS = {
+  dark: '#1b3c53',      // Dark navy blue
+  medium: '#234c6a',    // Medium blue
+  light: '#456882',     // Light blue
+  bg: '#e3e3e3',        // Light gray background
+  white: '#ffffff',
+  text: '#1f2937',
+  textLight: '#6b7280',
+};
 
 export function Login() {
   const [email, setEmail] = useState("");
@@ -17,32 +29,32 @@ export function Login() {
   const { toastError } = useCustomToast();
 
   // Check if the user is already authenticated via Google on page load (in case they were redirected back)
-useEffect(() => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get("token"); // Token from query
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token"); // Token from query
 
-  if (token) {
-    loginWithGoogleToken(token);
-  }
-}, []);
+    if (token) {
+      loginWithGoogleToken(token);
+    }
+  }, []);
 
- const loginWithGoogleToken = async (token: string) => {
-  try {
-    setLoading(true);
-    localStorage.setItem("token", token); // store token
-    const { data } = await api.get("/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  const loginWithGoogleToken = async (token: string) => {
+    try {
+      setLoading(true);
+      localStorage.setItem("token", token); // store token
+      const { data } = await api.get("/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (data.role?.toLowerCase() === "super_admin") navigate("/admin");
-    else if (data.role?.toLowerCase() === "employer") navigate("/employer");
-    else navigate("/dashboard");
-  } catch (error: any) {
-    toastError(error.response?.data?.message || "Google login failed");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (data.role?.toLowerCase() === "super_admin") navigate("/admin");
+      else if (data.role?.toLowerCase() === "employer") navigate("/employer");
+      else navigate("/dashboard");
+    } catch (error: any) {
+      toastError(error.response?.data?.message || "Google login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,20 +79,11 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-[#e3e3e3] flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Link to="/" className="flex items-center justify-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="h-10 w-10 text-blue-600" />
-                <User className="h-5 w-5 text-blue-600 absolute -top-1 -right-1" />
-              </div>
-              <div>
-                <span className="text-3xl font-bold text-blue-600">BAHATH</span>
-                <span className="text-3xl font-bold text-blue-800 ml-1">JOBZ</span>
-              </div>
-            </div>
+            <img src={logoMulticolor} alt="logo" className="h-40 w-40" />
           </Link>
           <p className="mt-2 text-gray-600">Sign in to your account</p>
         </div>
@@ -94,6 +97,7 @@ useEffect(() => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
+              className="focus:ring-[#234c6a] focus:ring-1 focus:ring-offset-1"
             />
 
             <Input
@@ -103,6 +107,7 @@ useEffect(() => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
+              className="focus:ring-[#234c6a] focus:ring-1 focus:ring-offset-1"
             />
 
             <div className="flex items-center justify-between">
@@ -115,13 +120,13 @@ useEffect(() => {
               </label>
               <Link
                 to="/auth/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-500"
+                className="text-sm text-[#456882] hover:text-[#456882]/80"
               >
                 Forgot password?
               </Link>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button variant="search" type="submit" className="w-full" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
@@ -131,7 +136,7 @@ useEffect(() => {
               Don't have an account?{" "}
               <Link
                 to="/auth/register"
-                className="text-blue-600 hover:text-blue-500 font-medium"
+                className="text-[#456882] hover:text-[#456882]/80 font-medium"
               >
                 Sign up here
               </Link>
@@ -141,7 +146,8 @@ useEffect(() => {
             <Button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full bg-red-500 hover:bg-red-600 text-white"
+              variant="blue"
+              className="w-full"
             >
               Sign in with Google
             </Button>

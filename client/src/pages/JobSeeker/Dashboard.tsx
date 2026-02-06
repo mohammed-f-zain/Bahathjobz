@@ -17,6 +17,17 @@ import {
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
+const COLORS = {
+  dark: '#1b3c53',      // Dark navy blue
+  medium: '#234c6a',    // Medium blue
+  light: '#456882',     // Light blue
+  bg: '#e3e3e3',        // Light gray background
+  blue: '#1292bf',
+  white: '#ffffff',
+  text: '#1f2937',
+  textLight: '#6b7280',
+};
+
 export function Dashboard() {
   const [stats, setStats] = useState({
     applications: 0,
@@ -104,8 +115,8 @@ export function Dashboard() {
               <p className="text-xs sm:text-sm font-medium text-gray-600">Applications</p>
               <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats.applications}</p>
             </div>
-            <div className="bg-blue-100 p-2 sm:p-3 rounded-full order-1 sm:order-2">
-              <FileText className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600" />
+            <div className="p-2 sm:p-3 rounded-full order-1 sm:order-2" style={{ backgroundColor: 'rgba(35, 76, 106, 0.1)' }}>
+              <FileText className="h-4 w-4 sm:h-6 sm:w-6 text-[#234c6a]" />
             </div>
           </div>
         </Card>
@@ -116,8 +127,8 @@ export function Dashboard() {
               <p className="text-xs sm:text-sm font-medium text-gray-600">Saved Jobs</p>
               <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats.favorites}</p>
             </div>
-            <div className="bg-purple-100 p-2 sm:p-3 rounded-full order-1 sm:order-2">
-              <Bookmark className="h-4 w-4 sm:h-6 sm:w-6 text-purple-600" />
+            <div className="p-2 sm:p-3 rounded-full order-1 sm:order-2" style={{ backgroundColor: 'rgba(188, 195, 202, 0.1)' }}>
+              <Bookmark className="h-4 w-4 sm:h-6 sm:w-6 text-[#1292bf]" />
             </div>
           </div>
         </Card>
@@ -134,7 +145,7 @@ export function Dashboard() {
           </div>
           <div className="space-y-3 sm:space-y-4">
             {recentApplications.length > 0 ? recentApplications.map((application: any) => (
-              <div key={application.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-blue-300 transition-colors">
+              <div key={application.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-[#1292bf] transition-colors">
                 <div className="flex justify-between items-start gap-2 mb-2">
                   <div className="min-w-0">
                     <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{application.job_title}</h4>
@@ -175,25 +186,25 @@ export function Dashboard() {
           <div className="space-y-2 sm:space-y-3">
             <Link to="/jobs" className="block">
               <div className="flex items-center p-2.5 sm:p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
-                <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2 sm:mr-3 flex-shrink-0" />
+                <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-[#1292bf] mr-2 sm:mr-3 flex-shrink-0" />
                 <span className="font-medium text-gray-900 text-sm sm:text-base">Browse Jobs</span>
               </div>
             </Link>
             <Link to="/profile" className="block">
               <div className="flex items-center p-2.5 sm:p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
-                <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2 sm:mr-3 flex-shrink-0" />
+                <User className="h-4 w-4 sm:h-5 sm:w-5 text-[#1292bf] mr-2 sm:mr-3 flex-shrink-0" />
                 <span className="font-medium text-gray-900 text-sm sm:text-base">Update Profile</span>
               </div>
             </Link>
             <Link to="/saved-jobs" className="block">
               <div className="flex items-center p-2.5 sm:p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
-                <Bookmark className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2 sm:mr-3 flex-shrink-0" />
+                <Bookmark className="h-4 w-4 sm:h-5 sm:w-5 text-[#1292bf] mr-2 sm:mr-3 flex-shrink-0" />
                 <span className="font-medium text-gray-900 text-sm sm:text-base">Saved Jobs</span>
               </div>
             </Link>
             <Link to="/applications" className="block">
               <div className="flex items-center p-2.5 sm:p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
-                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2 sm:mr-3 flex-shrink-0" />
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-[#1292bf] mr-2 sm:mr-3 flex-shrink-0" />
                 <span className="font-medium text-gray-900 text-sm sm:text-base">My Applications</span>
               </div>
             </Link>

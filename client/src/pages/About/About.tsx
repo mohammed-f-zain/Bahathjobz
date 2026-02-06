@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '../../components/UI/Card';
 import { Button } from '../../components/UI/Button';
@@ -83,6 +83,93 @@ const achievements = [
 ];
 
 export function About() {
+  const storyTextRef = useRef<HTMLDivElement | null>(null);
+  const storyImageRef = useRef<HTMLDivElement | null>(null);
+  const missionRef = useRef<HTMLDivElement | null>(null);
+  const visionRef = useRef<HTMLDivElement | null>(null);
+  const achievementsRef = useRef<HTMLDivElement | null>(null);
+  const whyChooseRef = useRef<HTMLDivElement | null>(null);
+  const ctaRef = useRef<HTMLDivElement | null>(null);
+  const valueCardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const achievementRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+
+    const observeElement = (
+      element: HTMLElement | null,
+      sectionName: string
+    ) => {
+      if (!element) return;
+
+      // Check if already in viewport
+      const rect = element.getBoundingClientRect();
+      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+
+      if (isInViewport) {
+        setVisibleSections((prev) => new Set([...prev, sectionName]));
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setTimeout(() => {
+                setVisibleSections((prev) => new Set([...prev, sectionName]));
+              }, 10);
+            } else {
+              setVisibleSections((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(sectionName);
+                return newSet;
+              });
+            }
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: '0px 0px -100px 0px',
+        }
+      );
+
+      observer.observe(element);
+      observers.push(observer);
+    };
+
+    // Observe all sections
+    observeElement(storyTextRef.current, 'storyText');
+    observeElement(storyImageRef.current, 'storyImage');
+    observeElement(missionRef.current, 'mission');
+    observeElement(visionRef.current, 'vision');
+    observeElement(achievementsRef.current, 'achievements');
+    observeElement(whyChooseRef.current, 'whyChoose');
+    observeElement(ctaRef.current, 'cta');
+
+    // Use setTimeout to ensure refs are set after render
+    const timeoutId = setTimeout(() => {
+      // Observe value cards
+      valueCardRefs.current.forEach((card, index) => {
+        if (card) {
+          observeElement(card, `value-${index}`);
+        }
+      });
+
+      // Observe achievement items
+      achievementRefs.current.forEach((item, index) => {
+        if (item) {
+          observeElement(item, `achievement-${index}`);
+        }
+      });
+    }, 200);
+
+    return () => {
+      clearTimeout(timeoutId);
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, []);
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: COLORS.bg }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -106,7 +193,10 @@ export function About() {
         {/* Our Story */}
         <div className="mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div
+              ref={storyTextRef}
+              className={visibleSections.has('storyText') ? 'animate-slide-in-left' : 'opacity-0'}
+            >
               <h2 className="text-3xl sm:text-4xl font-bold mb-6" style={{ color: COLORS.dark }}>Our Story</h2>
               <div className="space-y-4" style={{ color: COLORS.textLight }}>
                 <p>
@@ -125,7 +215,10 @@ export function About() {
                 </p>
               </div>
             </div>
-            <div className="relative">
+            <div
+              ref={storyImageRef}
+              className={`relative ${visibleSections.has('storyImage') ? 'animate-slide-in-right' : 'opacity-0'}`}
+            >
               <img
                 src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800"
                 alt="Team collaboration"
@@ -149,7 +242,12 @@ export function About() {
         {/* Mission & Vision */}
         <div className="mb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="p-8 text-center hover:shadow-xl transition-all duration-300" style={{ backgroundColor: COLORS.white }}>
+            <div
+              ref={missionRef}
+              className={visibleSections.has('mission') ? 'animate-fade-in-up' : 'opacity-0'}
+            >
+            <div style={{ backgroundColor: COLORS.white }}>
+            <Card className="p-8 text-center hover:shadow-xl transition-all duration-300">
               <div 
                 className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
                 style={{ 
@@ -164,7 +262,14 @@ export function About() {
                 build exceptional teams through innovative technology and personalized support.
               </p>
             </Card>
-            <Card className="p-8 text-center hover:shadow-xl transition-all duration-300" style={{ backgroundColor: COLORS.white }}>
+            </div>
+            </div>
+            <div
+              ref={visionRef}
+              className={visibleSections.has('vision') ? 'animate-fade-in-up-delayed' : 'opacity-0'}
+            >
+            <div style={{ backgroundColor: COLORS.white }}>
+            <Card className="p-8 text-center hover:shadow-xl transition-all duration-300">
               <div 
                 className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
                 style={{ 
@@ -179,6 +284,8 @@ export function About() {
                 can discover their potential and every company can find their perfect match.
               </p>
             </Card>
+            </div>
+            </div>
           </div>
         </div>
 
@@ -192,13 +299,6 @@ export function About() {
                 <Card 
                   key={index} 
                   className="p-6 text-center hover:shadow-xl transition-all duration-300 group"
-                  style={{ backgroundColor: COLORS.white }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
                 >
                   <div 
                     className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:scale-110"
@@ -218,13 +318,30 @@ export function About() {
 
         {/* Achievements */}
         <div 
+          ref={achievementsRef}
           className="rounded-2xl p-12 mb-16 shadow-xl"
           style={{ backgroundColor: COLORS.white }}
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12" style={{ color: COLORS.dark }}>Our Impact</h2>
+          <h2 className={`text-3xl sm:text-4xl font-bold text-center mb-12 ${visibleSections.has('achievements') ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ color: COLORS.dark }}>Our Impact</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {achievements.map((achievement, index) => (
-              <div key={index} className="text-center">
+            {achievements.map((achievement, index) => {
+              const animationClass = index % 4 === 0 
+                ? 'animate-fade-in-up' 
+                : index % 4 === 1 
+                ? 'animate-fade-in-up-delayed' 
+                : index % 4 === 2 
+                ? 'animate-fade-in-up-delayed-2' 
+                : 'animate-fade-in-up-delayed-3';
+              return (
+              <div
+                key={index}
+                ref={(el) => {
+                  if (el) {
+                    achievementRefs.current[index] = el;
+                  }
+                }}
+                className={`text-center ${visibleSections.has(`achievement-${index}`) ? animationClass : 'opacity-0'}`}
+              >
                 <div 
                   className="text-3xl sm:text-4xl font-bold mb-2"
                   style={{ 
@@ -238,12 +355,18 @@ export function About() {
                 </div>
                 <div style={{ color: COLORS.textLight }}>{achievement.label}</div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Why Choose Us */}
-        <Card className="p-8 mb-16" style={{ backgroundColor: COLORS.white }}>
+        <div
+          ref={whyChooseRef}
+          className={visibleSections.has('whyChoose') ? 'animate-fade-in-up' : 'opacity-0'}
+        >
+        <div style={{ backgroundColor: COLORS.white }}>
+        <Card className="p-8 mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8" style={{ color: COLORS.dark }}>Why Choose BAHATH JOBZ?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
@@ -278,10 +401,13 @@ export function About() {
             </div>
           </div>
         </Card>
+        </div>
+        </div>
 
         {/* CTA */}
-        <div 
-          className="rounded-2xl p-12 text-center text-white shadow-xl"
+        <div
+          ref={ctaRef}
+          className={`rounded-2xl p-12 text-center text-white shadow-xl ${visibleSections.has('cta') ? 'animate-fade-in-up' : 'opacity-0'}`}
           style={{ 
             background: `linear-gradient(135deg, ${COLORS.dark} 0%, ${COLORS.medium} 50%, ${COLORS.light} 100%)`
           }}

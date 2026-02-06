@@ -122,6 +122,7 @@ export default function UserContactList() {
 
       {/* ✅ View Replies Button (below badge) */}
       <Button
+        variant="blue"
         type="button"
         onClick={() => fetchReplies(contact.id)}
         className="flex items-center mt-2"

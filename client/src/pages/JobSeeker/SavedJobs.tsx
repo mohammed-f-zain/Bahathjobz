@@ -242,7 +242,7 @@ export function SavedJobs() {
                     View Job
                   </Button>
                 </a>
-                <Button variant="ghost" size="sm" onClick={() => handleRemove(job.id, job.type)}>
+                <Button variant="outline" size="sm" onClick={() => handleRemove(job.id, job.type)}>
                   Remove
                 </Button>
               </div>
@@ -275,7 +275,7 @@ export function SavedJobs() {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No saved jobs yet</h3>
           <p className="text-gray-600 mb-4">Start browsing jobs and save the ones you're interested in</p>
           <Link to="/jobs">
-            <Button>Browse Jobs</Button>
+            <Button variant="blue">Browse Jobs</Button>
           </Link>
         </Card>
       )}

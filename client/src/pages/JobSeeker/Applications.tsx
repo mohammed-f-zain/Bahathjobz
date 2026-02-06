@@ -101,7 +101,7 @@ export default function Applications() {
           </h1>
           <p className="text-sm sm:text-base text-gray-600">Track your job applications and statuses</p>
         </div>
-        <Button onClick={exportPDF} className="w-full sm:w-auto">
+        <Button variant="blue" onClick={exportPDF} className="w-full sm:w-auto">
           <Briefcase className="h-4 w-4 mr-2" />
           Export Report
         </Button>

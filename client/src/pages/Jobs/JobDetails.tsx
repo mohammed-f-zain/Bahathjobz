@@ -357,7 +357,7 @@ export function JobDetails() {
                 >
                   Mark Interest
                 </Button> */}
-                <Button onClick={() => setShowApplyModal(true)}>
+                <Button variant="blue" onClick={() => setShowApplyModal(true)}>
                   Apply Now
                 </Button>
               </>

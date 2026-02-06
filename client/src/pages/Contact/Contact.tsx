@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '../../components/UI/Card';
 import { Button } from '../../components/UI/Button';
 import { Input } from '../../components/UI/Input';
@@ -93,6 +93,39 @@ export function Contact() {
     message: '',
   });
   const [loading, setLoading] = useState(false);
+  const supportCategoriesRef = useRef<HTMLDivElement>(null);
+  const [isSupportCategoriesVisible, setIsSupportCategoriesVisible] = useState(false);
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Small delay to ensure animation retriggers
+            setTimeout(() => {
+              setIsSupportCategoriesVisible(true);
+            }, 10);
+          } else {
+            setIsSupportCategoriesVisible(false);
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px',
+      }
+    );
+
+    if (supportCategoriesRef.current) {
+      observer.observe(supportCategoriesRef.current);
+    }
+
+    return () => {
+      if (supportCategoriesRef.current) {
+        observer.unobserve(supportCategoriesRef.current);
+      }
+    };
+  }, []);
   
   const getInquiryTypes = () => {
     if (user?.role === 'employer') {
@@ -170,7 +203,7 @@ export function Contact() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             {/* Contact Methods */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 lg:sticky lg:top-4 lg:self-start">
               <h2 className="text-2xl font-bold mb-6" style={{ color: COLORS.dark }}>Get in Touch</h2>
               <div className="space-y-4">
                 {contactMethods.map((method, index) => {
@@ -290,21 +323,13 @@ export function Contact() {
                       required
                     />
                   </div>
-
+                  
+                  <div className=" mt-8 sm:mt-12 animate-fade-in w-full md:w-[30%] mx-auto">
                   <Button 
                     type="submit" 
                     disabled={loading} 
                     className="w-full"
-                    style={{ 
-                      background: `linear-gradient(135deg, ${COLORS.medium} 0%, ${COLORS.dark} 100%)`,
-                      color: COLORS.white
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = `linear-gradient(135deg, ${COLORS.dark} 0%, ${COLORS.medium} 100%)`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = `linear-gradient(135deg, ${COLORS.medium} 0%, ${COLORS.dark} 100%)`;
-                    }}
+                    variant="cta"
                   >
                     {loading ? (
                       'Sending...'
@@ -315,6 +340,7 @@ export function Contact() {
                       </>
                     )}
                   </Button>
+                  </div>
                 </form>
               </Card>
             </div>
@@ -347,9 +373,14 @@ export function Contact() {
           </div>
 
           {/* Support Categories */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div 
+            ref={supportCategoriesRef}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
+          >
             <Card 
-              className="p-6 text-center hover:shadow-xl transition-all duration-300 group"
+              className={`p-6 text-center hover:shadow-xl transition-all duration-300 group ${
+                isSupportCategoriesVisible ? 'animate-fade-in-up' : 'opacity-0'
+              }`}
               style={{ backgroundColor: COLORS.white }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-5px)';
@@ -373,25 +404,16 @@ export function Contact() {
               <Button 
                 variant="outline" 
                 size="sm"
-                style={{ 
-                  borderColor: COLORS.medium,
-                  color: COLORS.medium
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = COLORS.medium;
-                  e.currentTarget.style.color = COLORS.white;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = COLORS.medium;
-                }}
+                
               >
                 Job Seeker Help
               </Button>
             </Card>
 
             <Card 
-              className="p-6 text-center hover:shadow-xl transition-all duration-300 group"
+              className={`p-6 text-center hover:shadow-xl transition-all duration-300 group ${
+                isSupportCategoriesVisible ? 'animate-fade-in-up-delayed' : 'opacity-0'
+              }`}
               style={{ backgroundColor: COLORS.white }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-5px)';
@@ -433,7 +455,9 @@ export function Contact() {
             </Card>
 
             <Card 
-              className="p-6 text-center hover:shadow-xl transition-all duration-300 group"
+              className={`p-6 text-center hover:shadow-xl transition-all duration-300 group ${
+                isSupportCategoriesVisible ? 'animate-fade-in-up-delayed-2' : 'opacity-0'
+              }`}
               style={{ backgroundColor: COLORS.white }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-5px)';

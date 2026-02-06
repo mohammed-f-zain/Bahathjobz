@@ -6,6 +6,16 @@ import { User, ArrowRight, Clock, FileText } from "lucide-react";
 import api from "../../utils/api";
 import toast from "react-hot-toast";
 
+const COLORS = {
+  dark: '#1b3c53',      // Dark navy blue
+  medium: '#234c6a',    // Medium blue
+  light: '#456882',     // Light blue
+  bg: '#e3e3e3',        // Light gray background
+  white: '#ffffff',
+  text: '#1f2937',
+  textLight: '#6b7280',
+};
+
 type BlogPost = {
   id: number;
   title: string;
@@ -107,16 +117,22 @@ export function Blog() {
   return (
     <div className="p-6">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-12 mb-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">BAHATH JOBZ Blog</h1>
-          <p className="text-xl text-blue-100">
-            Career insights, job search tips, and industry trends to help you
-            succeed
-          </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className="rounded-2xl p-12 mb-16 text-white shadow-xl"
+          style={{
+            background: `linear-gradient(135deg, ${COLORS.dark} 0%, ${COLORS.medium} 50%, ${COLORS.light} 100%)`
+          }}
+        >
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl sm:text-5xl font-bold mb-6">BAHATH JOBZ Blog</h1>
+            <p className="text-xl text-white/90 leading-relaxed">
+              Career insights, job search tips, and industry trends to help you succeed
+            </p>
+          </div>
         </div>
       </div>
-
+      
       {/* Category Filter */}
       <div className="mb-8">
         <div className="flex flex-wrap gap-2 justify-center">
@@ -124,11 +140,10 @@ export function Blog() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? "bg-blue-600 text-white"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
+                  ? "bg-[#456882] text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+                }`}
             >
               {category}
             </button>
@@ -144,7 +159,7 @@ export function Blog() {
               <img
                 src={`${import.meta.env.VITE_URL}${posts[0].featured_image}` || getDefaultImage(posts[0].category)}
                 alt={posts[0].title}
-               className="w-full h-32 md:h-[250px] object-cover"
+                className="w-full h-32 md:h-[250px] object-cover"
               />
             </div>
             <div className="md:w-1/2 p-8">

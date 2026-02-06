@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "../../components/UI/Card";
+import { Card2 } from "../../components/UI/Card2";
 import { Button } from "../../components/UI/Button";
 import { User, ArrowRight, Clock, FileText } from "lucide-react";
 import api from "../../utils/api";
@@ -86,11 +87,13 @@ export function Blog() {
         "https://images.pexels.com/photos/4226140/pexels-photo-4226140.jpeg?auto=compress&cs=tinysrgb&w=800",
       "Career Growth":
         "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=800",
-      Technology:
+      "Technology":
         "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800",
       "Personal Branding":
         "https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=800",
       "Career Change":
+        "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "Industry Insights":
         "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800",
     };
     return (
@@ -132,7 +135,7 @@ export function Blog() {
           </div>
         </div>
       </div>
-      
+
       {/* Category Filter */}
       <div className="mb-8">
         <div className="flex flex-wrap gap-2 justify-center">
@@ -141,8 +144,8 @@ export function Blog() {
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
-                  ? "bg-[#456882] text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-[#456882] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
             >
               {category}
@@ -157,9 +160,9 @@ export function Blog() {
           <div className="md:flex">
             <div className="md:w-1/2">
               <img
-                src={`${import.meta.env.VITE_URL}${posts[0].featured_image}` || getDefaultImage(posts[0].category)}
+                src={posts[0].featured_image !== null ? `${import.meta.env.VITE_URL}${posts[0].featured_image}` : getDefaultImage(posts[0].category)}
                 alt={posts[0].title}
-                className="w-full h-32 md:h-[250px] object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
             <div className="md:w-1/2 p-8">
@@ -186,10 +189,30 @@ export function Blog() {
                     {posts[0].readTime}
                   </span>
                 </div>
-                <Link to={`/blog/${posts[0].slug}`} className="inline-block">
-                  <Button>
-                    Read More <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
+                <Link
+                  to={`/blog/${posts[0].slug}`}
+                  className="mt-auto self-start"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    className="flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-[4rem] transition-all duration-300 group/btn"
+                    style={{
+                      borderColor: COLORS.dark,
+                      backgroundColor: COLORS.white,
+                      color: COLORS.dark,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = COLORS.dark;
+                      e.currentTarget.style.color = COLORS.white;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = COLORS.white;
+                      e.currentTarget.style.color = COLORS.dark;
+                    }}
+                  >
+                    <span className="font-medium text-base">Read More</span>
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:-rotate-[30deg]" />
+                  </button>
                 </Link>
               </div>
             </div>
@@ -200,12 +223,11 @@ export function Blog() {
       {/* Blog Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-6xl mx-auto mb-16">
         {posts.slice(selectedCategory === "All" ? 1 : 0).map((post) => (
-          <Card
+          <Card2
             key={post.id}
-            className="overflow-hidden hover:shadow-lg transition-shadow"
           >
             <img
-              src={`${import.meta.env.VITE_URL}${post.featured_image}` || getDefaultImage(post.category)}
+              src={post.featured_image !== null ? `${import.meta.env.VITE_URL}${post.featured_image}` : getDefaultImage(post.category)}
               alt={post.title}
               className="w-full h-48 object-cover"
             />
@@ -230,14 +252,34 @@ export function Blog() {
                     {post.author}
                   </span>
                 </div>
-                <Link to={`/blog/${post.slug}`} className="inline-block">
-                  <Button variant="ghost" size="sm">
-                    Read More
-                  </Button>
+                <Link
+                  to={`/blog/${post.slug}`}
+                  className="mt-auto self-start"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    className="flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-[4rem] transition-all duration-300 group/btn"
+                    style={{
+                      borderColor: COLORS.dark,
+                      backgroundColor: COLORS.white,
+                      color: COLORS.dark,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = COLORS.dark;
+                      e.currentTarget.style.color = COLORS.white;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = COLORS.white;
+                      e.currentTarget.style.color = COLORS.dark;
+                    }}
+                  >
+                    <span className="font-medium text-base">Read More</span>
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:-rotate-[30deg]" />
+                  </button>
                 </Link>
               </div>
             </div>
-          </Card>
+          </Card2>
         ))}
       </div>
 

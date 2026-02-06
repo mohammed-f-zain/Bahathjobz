@@ -33,7 +33,7 @@ export function JobDetails() {
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [jobSeekerProfile, setJobSeekerProfile] = useState<JobSeeker | null>(null);
 
-    const getBackLink = () => {
+  const getBackLink = () => {
     switch (user?.role) {
       case 'super_admin':
         return '/admin/jobs';
@@ -51,14 +51,14 @@ export function JobDetails() {
   }, [id]);
 
   useEffect(() => {
-     if (user && id) {
+    if (user && id) {
       fetchUserEngagement();
     }
     if (user && user.role === 'job_seeker') {
       fetchJobSeekerProfile();
     }
   }, [user, id]);
- const fetchJobSeekerProfile = async () => {
+  const fetchJobSeekerProfile = async () => {
     try {
       const res = await api.get('/profiles/job-seeker/me');
       if (res.data.profile) {
@@ -102,7 +102,7 @@ export function JobDetails() {
       toast.error('Only job seekers can apply for jobs');
       return;
     }
-     if (!jobSeekerProfile) {
+    if (!jobSeekerProfile) {
       toast.error('Please complete your profile before applying.');
       // navigate('/profile/jobseeker-profile');
       return;
@@ -176,36 +176,36 @@ export function JobDetails() {
 
   const formatSalary = (min?: number, max?: number, currency: string = 'USD') => {
     if (!min && !max) return 'Salary not specified';
- const currencySymbols: Record<string, string> = {
-    AFN: '؋',    // Afghanistan
-    AMD: '֏',    // Armenia
-    AZN: '₼',    // Azerbaijan
-    BHD: '.د.ب', // Bahrain
-    EUR: '€',    // Cyprus
-    GEL: '₾',    // Georgia
-    IQD: 'ع.د',  // Iraq
-    IRR: '﷼',    // Iran
-    ILS: '₪',    // Israel / Palestine
-    JOD: 'ينار', // Jordan
-    KWD: 'ك',    // Kuwait
-    LBP: 'ل.ل',  // Lebanon
-    SYP: '£S',   // Syria
-    AED: 'د.إ',  // UAE
-    OMR: 'ر.ع',  // Oman
-    QAR: 'ر.ق',  // Qatar
-    SAR: 'SR',   // Saudi Arabia
-    YER: '﷼',
-       // Yemen
+    const currencySymbols: Record<string, string> = {
+      AFN: '؋',    // Afghanistan
+      AMD: '֏',    // Armenia
+      AZN: '₼',    // Azerbaijan
+      BHD: '.د.ب', // Bahrain
+      EUR: '€',    // Cyprus
+      GEL: '₾',    // Georgia
+      IQD: 'ع.د',  // Iraq
+      IRR: '﷼',    // Iran
+      ILS: '₪',    // Israel / Palestine
+      JOD: 'ينار', // Jordan
+      KWD: 'ك',    // Kuwait
+      LBP: 'ل.ل',  // Lebanon
+      SYP: '£S',   // Syria
+      AED: 'د.إ',  // UAE
+      OMR: 'ر.ع',  // Oman
+      QAR: 'ر.ق',  // Qatar
+      SAR: 'SR',   // Saudi Arabia
+      YER: '﷼',
+      // Yemen
 
-    // add more currencies as needed
+      // add more currencies as needed
+    };
+
+    const symbol = currencySymbols[currency] || currency;
+
+    if (min && max) return `${symbol}${min.toLocaleString()} - ${symbol}${max.toLocaleString()}`;
+    if (min) return `${symbol}${min.toLocaleString()}+`;
+    return `Up to ${symbol}${max?.toLocaleString()}`;
   };
-
-  const symbol = currencySymbols[currency] || currency;
-
-  if (min && max) return `${symbol}${min.toLocaleString()} - ${symbol}${max.toLocaleString()}`;
-  if (min) return `${symbol}${min.toLocaleString()}+`;
-  return `Up to ${symbol}${max?.toLocaleString()}`;
-};
 
   const getWorkTypeBadge = (workType: string) => {
     const badges = {
@@ -265,12 +265,12 @@ export function JobDetails() {
         Back to Jobs
       </button> */}
       <Link to={getBackLink()} className="inline-flex items-center justify-center font-medium transition-colors border border-[#456882] rounded-full text-[#456882] hover:bg-[#456882]/10 focus:ring-[#456882] px-3 py-1.5 text-sm mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Jobs
-        </Link>
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Jobs
+      </Link>
 
       {/* Job Header */}
-     <Card className="mb-6">
+      <Card className="mb-6">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-start space-x-4">
             <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -285,9 +285,9 @@ export function JobDetails() {
               <div className="flex items-center space-x-3 text-gray-600 mb-2">
                 <span className="font-medium">{job.company_name}</span>
                 {job.company_website && (
-                  <a 
-                    href={job.company_website} 
-                    target="_blank" 
+                  <a
+                    href={job.company_website}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center text-blue-600 hover:text-blue-700"
                   >
@@ -311,12 +311,12 @@ export function JobDetails() {
               {/* <Heart className="h-5 w-5" /> */}
             </button>
             {user?.role === 'job_seeker' && (
-            <button
-              onClick={() => handleEngagement('favorite')}
-              className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-            >
-              <Bookmark className={`h-5 w-5 ${savedIds.includes(id!) ? 'text-blue-500 fill-current' : ''}`} />
-            </button>
+              <button
+                onClick={() => handleEngagement('favorite')}
+                className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+              >
+                <Bookmark className={`h-5 w-5 ${savedIds.includes(id!) ? 'text-blue-500 fill-current' : ''}`} />
+              </button>
             )}
             <button onClick={handleShare} className="p-2 text-gray-400 hover:text-green-500 transition-colors">
               <Share2 className="h-5 w-5" />
@@ -461,7 +461,7 @@ export function JobDetails() {
                 {/* <span className="text-gray-600">About</span> */}
                 <p className="text-sm text-gray-700 mt-1">{job.company?.description || 'Not available'}</p>
               </div>
-              
+
             </div>
           </Card>
 
